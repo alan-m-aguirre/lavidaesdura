@@ -58,7 +58,7 @@ test2 :: Situacion
 test2 = [(UnAspecto "incertidumbre" 50),(UnAspecto "peligro" 50),(UnAspecto "tension" 50)]
 
 test3 :: Situacion
-test3 = [(UnAspecto "incertidumbre" 50)]
+test3 = [(UnAspecto "incertidumbre" 200)]
 
 vidente :: Personalidad
 vidente = modificarSituacion (UnAspecto "tension" 0) (+(-10)).modificarSituacion (UnAspecto "incertidumbre" 0) (/2)
@@ -69,7 +69,7 @@ relajada valor = modificarSituacion (UnAspecto "peligro" 0) (+valor).modificarSi
 gemaDescuidada :: Gema
 gemaDescuidada = Gema {
   nombre = "Descuidada",
-  fuerza = 1,
+  fuerza = 5,
   personalidad = relajada 10
 }
 
@@ -106,11 +106,15 @@ nuevaPersonalidad personalidad1 personalidad2 = personalidad2.personalidad1.efec
 compatibilidad :: Gema -> Gema -> Situacion -> Bool
 compatibilidad gema1 gema2 situacion = mejorSituacion (nuevaPersonalidad (personalidad gema1) (personalidad gema2) $ situacion) (personalidad gema2.personalidad gema1 $ situacion)
 
+masFuerte :: Gema -> Gema -> Gema
+masFuerte gema1 gema2
+ | fuerza gema1 > fuerza gema2 = gema1
+ | otherwise = gema2
+
 nuevaFuerza ::  Situacion-> Gema -> Gema -> Int
 nuevaFuerza situacion gema1 gema2
   | compatibilidad gema1 gema2 situacion = (*10).(+) (fuerza gema2).fuerza $ gema1
-  | fuerza gema1 > fuerza gema2 = (*7).fuerza $ gema1
-  | otherwise = (*7).fuerza $ gema2
+  | otherwise = (*7).fuerza $ (masFuerte gema1 gema2)
 
 fusion :: Situacion -> Gema -> Gema -> Gema
 fusion situacion (Gema nombre1 fuerza1 personalidad1) (Gema nombre2 fuerza2 personalidad2) = Gema {
@@ -123,4 +127,4 @@ fusion situacion (Gema nombre1 fuerza1 personalidad1) (Gema nombre2 fuerza2 pers
 ----  QUINTO  PUNTO  ----
 ------------------------}
 fusionGrupal :: Situacion -> [Gema] -> Gema
-fusionGrupal situacion = foldr1 (fusion situacion)
+fusionGrupal situacion = foldl1 (fusion situacion)
