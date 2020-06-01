@@ -108,7 +108,7 @@ compatibilidad gema1 gema2 situacion = mejorSituacion (nuevaPersonalidad (person
 
 masFuerte :: Gema -> Gema -> Gema
 masFuerte gema1 gema2
- | fuerza gema1 > fuerza gema2 = gema1
+ | fuerza gema1 >= fuerza gema2 = gema1
  | otherwise = gema2
 
 nuevaFuerza ::  Situacion-> Gema -> Gema -> Int

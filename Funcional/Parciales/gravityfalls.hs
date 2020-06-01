@@ -103,14 +103,8 @@ cesar clave texto = zipWithIf (desencriptarLetra) (esLetra) (repeat clave) texto
 {------------------------
 ----      BONUS      ----
 ------------------------}
-repetirClave :: String -> String
-repetirClave clave = (++) clave.repetirClave $ clave
-
-generarTextoClave :: String -> String -> String
-generarTextoClave clave texto = zipWithIf (\ x _ -> x) (esLetra) (repetirClave clave) texto
-
 vigenere :: String -> String -> String
-vigenere clave texto = zipWith (desencriptarLetra') (generarTextoClave clave texto) texto
+vigenere clave texto = zipWithIf (desencriptarLetra) (esLetra) (cycle clave) texto
 
 {------------------------
 ----SUJETOS DE PRUEBA----
@@ -193,3 +187,9 @@ desencriptarLetra' clave input
 
 cesar' :: Char -> String -> String
 cesar' clave texto = map (desencriptarLetra clave) texto --prefiero usar map antes que ZipWithIf.
+
+repetirClave :: String -> String
+repetirClave clave = (++) clave.repetirClave $ clave
+
+generarTextoClave :: String -> String -> String
+generarTextoClave clave texto = zipWithIf (\ x _ -> x) (esLetra) (repetirClave clave) texto
