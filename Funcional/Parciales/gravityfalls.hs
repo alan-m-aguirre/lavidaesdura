@@ -1,6 +1,8 @@
 {------------------------
 ----  PRIMERA PARTE  ----
 ------------------------}
+
+--[1]
 type Item = String
 type Requerimientos = Persona -> Bool
 
@@ -35,6 +37,7 @@ esGnomo = (==) tipoGnomos.tipo
 esFantasma :: Criatura -> Bool
 esFantasma = (==) tipoFantasma.tipo
 
+--[2]
 peligrosidad :: Criatura -> Int
 peligrosidad criatura
   | esGnomo criatura = (2^).cantidad $ criatura
@@ -54,39 +57,46 @@ leGana persona criatura
   | esGnomo criatura = tieneItem "soplador de hojas" persona
   | otherwise = all (==True).map ($ persona).requerimientos $ criatura
 
-enfrentar :: Criatura -> Persona -> Persona
-enfrentar criatura persona
-  | leGana persona criatura = darExperiencia (peligrosidad criatura) persona
-  | otherwise = darExperiencia 1 persona
-
-enfrentarGrupo' :: [Criatura] -> Persona -> Persona
-enfrentarGrupo' [] persona = persona
-enfrentarGrupo' (c:cs) persona = enfrentarGrupo' cs.enfrentar c $ persona
-
 calcularExperiencia :: Persona -> Criatura -> Int
 calcularExperiencia persona criatura
   | leGana persona criatura = peligrosidad criatura
   | otherwise = 1 
 
+enfrentar :: Criatura -> Persona -> Persona
+enfrentar criatura persona = darExperiencia (calcularExperiencia persona criatura) persona
+
+--[3]
 calcularExperienciaGrupo :: [Criatura] -> Persona -> Int
 calcularExperienciaGrupo criaturas persona = foldl1 (+).map (calcularExperiencia persona) $ criaturas
 
-enfrentarGrupo :: [Criatura] -> Persona -> Persona
-enfrentarGrupo criaturas persona = darExperiencia (calcularExperienciaGrupo criaturas persona) persona
-
 {-
 Consultas:
-Main>calcularExperienciaGrupo grupoCriaturas menorDe13
+Main> calcularExperienciaGrupo grupoCriaturas menorDe13
 1105
-Main>calcularExperienciaGrupo grupoCriaturas perdedor
+Main> calcularExperienciaGrupo grupoCriaturas perdedor
 4
 Main> calcularExperienciaGrupo grupoCriaturas cazaFantasma1
 23
 -}
 
+enfrentarGrupo :: [Criatura] -> Persona -> Persona
+enfrentarGrupo criaturas persona = darExperiencia (calcularExperienciaGrupo criaturas persona) persona
+
+-- ALTERNATIVAMENTE:
+enfrentar' :: Criatura -> Persona -> Persona
+enfrentar' criatura persona
+  | leGana persona criatura = darExperiencia (peligrosidad criatura) persona
+  | otherwise = darExperiencia 1 persona
+
+enfrentarGrupo' :: [Criatura] -> Persona -> Persona
+enfrentarGrupo' [] persona = persona
+enfrentarGrupo' (c:cs) persona = enfrentarGrupo' cs.enfrentar' c $ persona
+
 {------------------------
 ----  SEGUNDA PARTE  ----
 ------------------------}
+
+--[1]
 zipWithIf :: (a -> b -> b) -> (b -> Bool) -> [a] -> [b] -> [b]
 zipWithIf _ _ [] _ = []
 zipWithIf _ _ _ [] = []
@@ -94,9 +104,11 @@ zipWithIf f criterio (x:xs) (y:ys)
   | criterio y = (:) (f x y) (zipWithIf f criterio xs ys)
   | otherwise = y : zipWithIf f criterio (x:xs) (ys)
 
+--[2.a]
 abecedarioDesde :: Char -> [Char] -- No se usa...
 abecedarioDesde inicio = (++) [inicio..'z'].init $ ['a'..inicio]
 
+--[2.b]
 abecedarioDesdeHasta :: Char -> Char -> [Char]
 abecedarioDesdeHasta inicio final
   | inicio <= final = [inicio..final]
@@ -105,15 +117,24 @@ abecedarioDesdeHasta inicio final
 esLetra :: Char -> Bool
 esLetra letra = elem letra ['a'..'z']
 
+desencriptarLetra :: Char -> Char -> Char
+desencriptarLetra clave = last.flip take ['a'..'z'].length.abecedarioDesdeHasta clave
+
+--[2.c]
+cesar :: Char -> String -> String
+cesar clave texto = zipWithIf (desencriptarLetra) (esLetra) (repeat clave) texto
+
+--[2.d]
 rotar :: String -> [String]
 rotar texto = map (`cesar` texto) ['a'..'z']
 
-desencriptarLetra :: Char -> Char -> Char
---desencriptarLetra clave = (!!) ['a'..'z'].(+(-1)).length.abecedarioDesdeHasta clave
-desencriptarLetra clave = last.flip take ['a'..'z'].length.abecedarioDesdeHasta clave
-
-cesar :: Char -> String -> String
-cesar clave texto = zipWithIf (desencriptarLetra) (esLetra) (repeat clave) texto
+{-
+Main> rotar "jrzel zrfaxal!"
+["jrzel zrfaxal!","iqydk yqezwzk!","hpxcj xpdyvyj!","gowbi wocxuxi!","fnvah vnbwtwh!","emuzg umavsvg!","dltyf tlzuruf!",
+"cksxe skytqte!","bjrwd rjxspsd!","aiqvc qiwrorc!","zhpub phvqnqb!","ygota ogupmpa!","xfnsz nftoloz!","wemry mesnkny!",
+"vdlqx ldrmjmx!","uckpw kcqlilw!","tbjov jbpkhkv!","sainu iaojgju!","rzhmt hznifit!","qygls gymhehs!","pxfkr fxlgdgr!",
+"owejq ewkfcfq!","nvdip dvjebep!","mucho cuidado!","ltbgn bthczcn!","ksafm asgbybm!"]
+-}
 
 {------------------------
 ----      BONUS      ----
@@ -187,27 +208,3 @@ cazaFantasma1 = Persona {
     items = [],
     experiencia = 50
 }
-
-{------------------------
-----   CODIGO  FEO   ----
-----     IGNORAR     ----
-------------------------}
-truncarAbecedario :: [Char] -> Char -> [Char] --Mejor forma de hacer esto? hecho: abecedarioDesdeHasta
-truncarAbecedario [] _ = []
-truncarAbecedario (a:az) letra
-  | a /= letra = a : truncarAbecedario az letra
-  | otherwise = [a]
-
-desencriptarLetra' :: Char -> Char -> Char
-desencriptarLetra' clave input
-  | esLetra input = (!!) ['a'..'z'].(+(-1)).length.truncarAbecedario (abecedarioDesde clave) $ input
-  | otherwise = input
-
-cesar' :: Char -> String -> String
-cesar' clave texto = map (desencriptarLetra clave) texto --prefiero usar map antes que ZipWithIf.
-
-repetirClave :: String -> String
-repetirClave clave = (++) clave.repetirClave $ clave
-
-generarTextoClave :: String -> String -> String
-generarTextoClave clave texto = zipWithIf (\ x _ -> x) (esLetra) (repetirClave clave) texto
