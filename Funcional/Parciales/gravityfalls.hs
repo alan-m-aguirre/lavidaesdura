@@ -6,6 +6,9 @@
 type Item = String
 type Requerimientos = Persona -> Bool
 
+soplador :: Item
+soplador = "soplador de hojas"
+
 tipoSiempredetras :: Int
 tipoSiempredetras = 1
 
@@ -23,26 +26,32 @@ data Persona = Persona {
 
 data Criatura = Criatura {
     tipo :: Int,
-    cantidad :: Int,
-    nivel :: Int,
+    peligrosidad :: Int,
     requerimientos :: [Requerimientos]
 }
 
-esSiempredetras :: Criatura -> Bool
-esSiempredetras = (==) tipoSiempredetras.tipo
+esSiempredetras :: Int -> Bool
+esSiempredetras = (==) tipoSiempredetras
 
-esGnomo :: Criatura -> Bool
-esGnomo = (==) tipoGnomos.tipo
+esGnomo :: Int -> Bool
+esGnomo = (==) tipoGnomos
 
-esFantasma :: Criatura -> Bool
-esFantasma = (==) tipoFantasma.tipo
+esFantasma :: Int -> Bool
+esFantasma = (==) tipoFantasma
 
 --[2]
-peligrosidad :: Criatura -> Int
-peligrosidad criatura
-  | esGnomo criatura = (2^).cantidad $ criatura
-  | esFantasma criatura = (*20).nivel $ criatura
-  | esSiempredetras criatura = 0
+crearCriatura :: Int -> Int -> [Requerimientos] -> Criatura
+crearCriatura tipoCriatura parametro requerimientosCriatura = Criatura {
+    tipo = tipoCriatura,
+    peligrosidad = setPeligrosidad tipoCriatura parametro,
+    requerimientos = requerimientosCriatura
+}
+
+setPeligrosidad :: Int -> Int -> Int
+setPeligrosidad tipoCriatura parametro
+  | esGnomo tipoCriatura = 2 ^ parametro
+  | esFantasma tipoCriatura = parametro * 20
+  | esSiempredetras tipoCriatura = 0
   | otherwise = undefined
 
 darExperiencia :: Int -> Persona -> Persona
@@ -53,8 +62,7 @@ tieneItem item = elem item.items
 
 leGana :: Persona -> Criatura -> Bool
 leGana persona criatura
-  | esSiempredetras criatura = False
-  | esGnomo criatura = tieneItem "soplador de hojas" persona
+  | esSiempredetras (tipo criatura) = False
   | otherwise = all (==True).map ($ persona).requerimientos $ criatura
 
 calcularExperiencia :: Persona -> Criatura -> Int
@@ -62,25 +70,25 @@ calcularExperiencia persona criatura
   | leGana persona criatura = peligrosidad criatura
   | otherwise = 1 
 
-enfrentar :: Criatura -> Persona -> Persona
-enfrentar criatura persona = darExperiencia (calcularExperiencia persona criatura) persona
+enfrentar :: Persona -> Criatura -> Persona
+enfrentar persona criatura = darExperiencia (calcularExperiencia persona criatura) persona
 
 --[3]
-calcularExperienciaGrupo :: [Criatura] -> Persona -> Int
-calcularExperienciaGrupo criaturas persona = foldl1 (+).map (calcularExperiencia persona) $ criaturas
+calcularExperienciaGrupo :: Persona -> [Criatura] -> Int
+calcularExperienciaGrupo persona = foldl1 (+).map (calcularExperiencia persona)
 
 {-
 Consultas:
-Main> calcularExperienciaGrupo grupoCriaturas menorDe13
+Main> calcularExperienciaGrupo menorDe13 grupoCriaturas
 1105
-Main> calcularExperienciaGrupo grupoCriaturas perdedor
+Main> calcularExperienciaGrupo perdedor grupoCriaturas
 4
-Main> calcularExperienciaGrupo grupoCriaturas cazaFantasma1
+Main> calcularExperienciaGrupo cazaFantasma1 grupoCriaturas
 23
 -}
 
 enfrentarGrupo :: [Criatura] -> Persona -> Persona
-enfrentarGrupo criaturas persona = darExperiencia (calcularExperienciaGrupo criaturas persona) persona
+enfrentarGrupo criaturas persona = darExperiencia (calcularExperienciaGrupo persona criaturas) persona
 
 -- ALTERNATIVAMENTE:
 enfrentar' :: Criatura -> Persona -> Persona
@@ -145,38 +153,17 @@ vigenere clave texto = zipWithIf (desencriptarLetra) (esLetra) (cycle clave) tex
 {------------------------
 ----SUJETOS DE PRUEBA----
 ------------------------}
-criaturaBase :: Criatura
-criaturaBase = Criatura {
-    tipo = 0,
-    cantidad = 1,
-    nivel = 0,
-    requerimientos = []
-}
-
 fantasma1 :: Criatura
-fantasma1 = criaturaBase {
-    tipo = tipoFantasma,
-    nivel = 1,
-    requerimientos = [(>10).experiencia]
-}
+fantasma1 = crearCriatura tipoFantasma 1 [(>10).experiencia]
 
 fantasma3 :: Criatura
-fantasma3 = criaturaBase {
-    tipo = tipoFantasma,
-    nivel = 3,
-    requerimientos = [tieneItem "disfraz de oveja", (<13).edad]
-}
-
-siempreDetras :: Criatura
-siempreDetras = criaturaBase {
-    tipo = tipoSiempredetras
-}
+fantasma3 = crearCriatura tipoFantasma 3 [tieneItem "disfraz de oveja", (<13).edad]
 
 gnomos :: Criatura
-gnomos = criaturaBase {
-    tipo = tipoGnomos,
-    cantidad = 10
-}
+gnomos = crearCriatura tipoGnomos 10 [tieneItem soplador]
+
+siempreDetras :: Criatura
+siempreDetras = crearCriatura tipoSiempredetras 0 []
 
 grupoCriaturas :: [Criatura]
 grupoCriaturas = [siempreDetras, gnomos, fantasma3, fantasma1]
