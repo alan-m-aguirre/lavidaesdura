@@ -74,31 +74,21 @@ enfrentar :: Persona -> Criatura -> Persona
 enfrentar persona criatura = darExperiencia (calcularExperiencia persona criatura) persona
 
 --[3]
-calcularExperienciaGrupo :: Persona -> [Criatura] -> Int
-calcularExperienciaGrupo persona = foldl1 (+).map (calcularExperiencia persona)
+enfrentarGrupo :: Persona -> [Criatura] -> Persona
+enfrentarGrupo persona criaturas = foldl (enfrentar) persona criaturas
+
+diferenciaExp :: Persona -> Persona -> Int
+diferenciaExp persona1 = (-) (experiencia persona1).experiencia 
 
 {-
 Consultas:
-Main> calcularExperienciaGrupo menorDe13 grupoCriaturas
+Main> diferenciaExp (enfrentarGrupo menorDe13 grupoCriaturas) menorDe13
 1105
-Main> calcularExperienciaGrupo perdedor grupoCriaturas
+Main> diferenciaExp (enfrentarGrupo perdedor grupoCriaturas) perdedor
 4
-Main> calcularExperienciaGrupo cazaFantasma1 grupoCriaturas
+Main> diferenciaExp (enfrentarGrupo cazaFantasma1 grupoCriaturas) cazaFantasma1
 23
 -}
-
-enfrentarGrupo :: [Criatura] -> Persona -> Persona
-enfrentarGrupo criaturas persona = darExperiencia (calcularExperienciaGrupo persona criaturas) persona
-
--- ALTERNATIVAMENTE:
-enfrentar' :: Criatura -> Persona -> Persona
-enfrentar' criatura persona
-  | leGana persona criatura = darExperiencia (peligrosidad criatura) persona
-  | otherwise = darExperiencia 1 persona
-
-enfrentarGrupo' :: [Criatura] -> Persona -> Persona
-enfrentarGrupo' [] persona = persona
-enfrentarGrupo' (c:cs) persona = enfrentarGrupo' cs.enfrentar' c $ persona
 
 {------------------------
 ----  SEGUNDA PARTE  ----
@@ -171,14 +161,14 @@ grupoCriaturas = [siempreDetras, gnomos, fantasma3, fantasma1]
 mataGnomos :: Persona
 mataGnomos = Persona {
     edad = 12,
-    items = ["soplador de hojas"],
+    items = [soplador],
     experiencia = 0
 }
 
 menorDe13 :: Persona
 menorDe13 = Persona {
     edad = 12,
-    items = ["soplador de hojas", "disfraz de oveja"],
+    items = [soplador, "disfraz de oveja"],
     experiencia = 11
 }
 
