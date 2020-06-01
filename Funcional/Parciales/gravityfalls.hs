@@ -54,20 +54,35 @@ leGana persona criatura
   | esGnomo criatura = tieneItem "soplador de hojas" persona
   | otherwise = all (==True).map ($ persona).requerimientos $ criatura
 
-enfrentar :: Persona -> Criatura -> Persona
-enfrentar persona criatura
+enfrentar :: Criatura -> Persona -> Persona
+enfrentar criatura persona
   | leGana persona criatura = darExperiencia (peligrosidad criatura) persona
   | otherwise = darExperiencia 1 persona
 
---Consultas:
---enfrentar mataGnomos fantasma1
---enfrentar mataGnomos gnomos
---enfrentar perdedor gnomos
---enfrentar perdedor fantasma3
---enfrentar menorDe13 fantasma3
---enfrentar menorDe13 fantasma1
---enfrentar cazaFantasma1 fantasma1
---enfrentar cazaFantasma1 fantasma3
+enfrentarGrupo' :: [Criatura] -> Persona -> Persona
+enfrentarGrupo' [] persona = persona
+enfrentarGrupo' (c:cs) persona = enfrentarGrupo' cs.enfrentar c $ persona
+
+calcularExperiencia :: Persona -> Criatura -> Int
+calcularExperiencia persona criatura
+  | leGana persona criatura = peligrosidad criatura
+  | otherwise = 1 
+
+calcularExperienciaGrupo :: [Criatura] -> Persona -> Int
+calcularExperienciaGrupo criaturas persona = foldl1 (+).map (calcularExperiencia persona) $ criaturas
+
+enfrentarGrupo :: [Criatura] -> Persona -> Persona
+enfrentarGrupo criaturas persona = darExperiencia (calcularExperienciaGrupo criaturas persona) persona
+
+{-
+Consultas:
+Main>calcularExperienciaGrupo grupoCriaturas menorDe13
+1105
+Main>calcularExperienciaGrupo grupoCriaturas perdedor
+4
+Main> calcularExperienciaGrupo grupoCriaturas cazaFantasma1
+23
+-}
 
 {------------------------
 ----  SEGUNDA PARTE  ----
@@ -141,6 +156,9 @@ gnomos = criaturaBase {
     tipo = tipoGnomos,
     cantidad = 10
 }
+
+grupoCriaturas :: [Criatura]
+grupoCriaturas = [siempreDetras, gnomos, fantasma3, fantasma1]
 
 mataGnomos :: Persona
 mataGnomos = Persona {
