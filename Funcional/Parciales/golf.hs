@@ -155,9 +155,6 @@ superarConsecutivamenteBonus listaObstaculos tiro = length.takeWhile (`superaCon
 type Competidor = (Jugador, Puntos)
 type Puntajes = [Competidor]
 
-listaPuntajes :: Puntajes
-listaPuntajes = [(bart, 90),(todd, 90),(rafa, 5)]
-
 mayorPuntaje :: Puntajes -> Puntos
 mayorPuntaje puntajes = maximum.map snd $ puntajes
 
@@ -167,7 +164,16 @@ filtroPerdedor puntajes = (< (mayorPuntaje puntajes)).snd
 primerLugar :: Puntajes -> Puntajes
 primerLugar puntajes = filter (not.filtroPerdedor puntajes) puntajes
 
-padresDePerdedores :: Puntajes -> [String]
-padresDePerdedores puntajes
-  | (length.primerLugar $ puntajes) == 1 = map (padre.fst).filter (/= (head.primerLugar $ puntajes)) $ puntajes
-  | otherwise = map (padre.fst) puntajes
+padreDeJugador :: Competidor -> String
+padreDeJugador = padre.fst
+
+listaPuntajes :: Puntajes
+listaPuntajes = [(bart, 90),(todd, 90),(rafa, 5)]
+
+apuesta :: [String]
+apuesta = [padre bart, padre todd]
+
+padresDePerdedores :: Puntajes -> [String] -> [String]
+padresDePerdedores puntajes apostadores
+  | (length.primerLugar $ puntajes) == 1 = filter (`elem` apostadores).map (padreDeJugador).filter (/= (head.primerLugar $ puntajes)) $ puntajes
+  | otherwise = filter (`elem` apostadores).map (padreDeJugador) $ puntajes
