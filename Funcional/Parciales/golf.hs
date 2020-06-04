@@ -81,8 +81,6 @@ golpe :: Jugador -> Palo -> Tiro
 golpe jugador palo = palo.habilidad $ jugador
 
 -- Punto 3
-setear :: Int -> a -> Int
-setear val _ = val
 
 type Condicion = Tiro -> Bool
 type EfectoTiro = Tiro -> Tiro
@@ -104,7 +102,7 @@ data Obstaculo = UnObstaculo{
 tunelConRampita :: Obstaculo
 tunelConRampita = UnObstaculo {
   condiciones = [(>90).precision, (==0).altura],
-  efectos = modificarVelocidad (*2).modificarPrecision (setear 100).modificarAltura (setear 0)
+  efectos = modificarVelocidad (*2).modificarPrecision ((+100).(*0)).modificarAltura (*0)
 }
 
 laguna :: Int -> Obstaculo
@@ -116,7 +114,7 @@ laguna largo = UnObstaculo {
 hoyo :: Obstaculo
 hoyo = UnObstaculo {
   condiciones = [between 5 20.velocidad,(==0).altura,(>95).precision],
-  efectos = modificarVelocidad (setear 0).modificarPrecision (setear 0).modificarAltura (setear 0)
+  efectos = modificarVelocidad (*0).modificarPrecision (*0).modificarAltura (*0)
 }
 
 superaCondicion :: Condicion -> Tiro -> Bool
@@ -124,11 +122,6 @@ superaCondicion condicion tiro = condicion tiro
 
 superaCondiciones :: Obstaculo -> Tiro -> Bool
 superaCondiciones obstaculo tiro = all (==True).map ($ tiro).condiciones $ obstaculo
-
-aplicarEfecto :: Tiro -> (Tiro -> Tiro) -> Tiro
-aplicarEfecto tiro f = f tiro
-
---tiro { velocidad = (efectoVelocidad obstaculo) tiro, precision = (efectoPrecision obstaculo) tiro, altura = (efectoAltura obstaculo) tiro }
 
 tiroTrasObstaculo :: Obstaculo -> Tiro -> Tiro
 tiroTrasObstaculo obstaculo tiro
@@ -155,17 +148,17 @@ superarConsecutivamente (x:xs) tiro
   | superaCondiciones x tiro = (+) 1 (superarConsecutivamente xs tiro)
   | otherwise = (+) 0 (superarConsecutivamente xs tiro)
 
-superarConsecutivamente' :: [Obstaculo] -> Tiro -> Int
-superarConsecutivamente' listaObstaculos tiro = length.takeWhile (`superaCondiciones` tiro) $ listaObstaculos
+superarConsecutivamenteBonus :: [Obstaculo] -> Tiro -> Int
+superarConsecutivamenteBonus listaObstaculos tiro = length.takeWhile (`superaCondiciones` tiro) $ listaObstaculos
 
 -- Punto 5
-type Competidor = (Jugador, Int)
+type Competidor = (Jugador, Puntos)
 type Puntajes = [Competidor]
 
 listaPuntajes :: Puntajes
 listaPuntajes = [(bart, 90),(todd, 90),(rafa, 5)]
 
-mayorPuntaje :: Puntajes -> Int
+mayorPuntaje :: Puntajes -> Puntos
 mayorPuntaje puntajes = maximum.map snd $ puntajes
 
 filtroPerdedor :: Puntajes -> Competidor -> Bool
