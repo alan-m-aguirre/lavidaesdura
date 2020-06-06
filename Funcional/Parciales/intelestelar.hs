@@ -67,7 +67,9 @@ cambiarPlaneta :: Planeta -> Astronauta -> Astronauta
 cambiarPlaneta planetaNuevo astronauta = (UnAstronauta (nombre astronauta) (edad astronauta) planetaNuevo )
 
 viajar :: Nave -> Planeta -> Astronauta -> Astronauta
-viajar nave planetaDestino astronauta =  cambiarPlaneta planetaDestino.pasarTiempo astronauta.(/ tiempoNave).distanciaPlanetas planetaDestino $ planetaOrigen
+viajar nave planetaDestino astronauta
+  | tiempoNave == 0 = cambiarPlaneta planetaDestino astronauta
+  | otherwise = cambiarPlaneta planetaDestino.pasarTiempo astronauta.(/ tiempoNave).distanciaPlanetas planetaDestino $ planetaOrigen
     where
         planetaOrigen = planeta astronauta
         tiempoNave = (nave planetaOrigen planetaDestino)
