@@ -38,9 +38,9 @@ diferenciaCoord coord planetaA = (-) (coord.posicion $ planetaA).coord.posicion
 distanciaPlanetas :: Planeta -> Planeta -> Float
 distanciaPlanetas planetaA planetaB =  sqrt (diffX + diffY + diffZ)
   where 
-      diffX = (^2).diferenciaCoord coordX planetaA $ planetaB
-      diffY = (^2).diferenciaCoord coordY planetaA $ planetaB
-      diffZ = (^2).diferenciaCoord coordZ planetaA $ planetaB
+      diffX = (**2).diferenciaCoord coordX planetaA $ planetaB
+      diffY = (**2).diferenciaCoord coordY planetaA $ planetaB
+      diffZ = (**2).diferenciaCoord coordZ planetaA $ planetaB
 
 -- 1.b
 tiempoViaje :: Planeta -> Planeta -> Float -> Float
@@ -61,7 +61,7 @@ naveVieja oxigeno planetaA planetaB
   | otherwise = tiempoViaje planetaA planetaB 7
 
 naveFuturista :: Nave 
-naveFuturista planetaA planetaB = 0
+naveFuturista _ _ = 0
 
 cambiarPlaneta :: Planeta -> Astronauta -> Astronauta
 cambiarPlaneta planetaNuevo astronauta = (UnAstronauta (nombre astronauta) (edad astronauta) planetaNuevo )
