@@ -107,3 +107,13 @@ perdedores :: [Persona] -> [Juego] -> [String]
 perdedores personas juegos = map nombrePersona.filter (`pierdeTodo` juegos) $ personas
 
 -- 6.
+cambiarDinero :: Persona -> Float -> Persona
+cambiarDinero persona monto = (UnaPersona (nombrePersona persona) ((+monto).dinero $ persona) (suerte persona) (factores persona))
+
+apostar :: Persona -> Float -> Juego -> Persona
+apostar persona apuesta juego
+  | (<apuesta).dinero $ persona = persona
+  | puedeGanar persona juego = cambiarDinero persona ganancia
+  | otherwise = cambiarDinero persona (-apuesta)
+      where
+        ganancia = (funcionDinero juego) $ apuesta
