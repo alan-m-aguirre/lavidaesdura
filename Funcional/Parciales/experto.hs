@@ -14,6 +14,9 @@ amuleto = "amuleto"
 factores :: Persona -> [(String,Int)]
 factores (UnaPersona _ _ _ listaFactores) = listaFactores
 
+dinero :: Persona -> Float
+dinero (UnaPersona _ d _ _) = d
+
 suerte :: Persona -> Int
 suerte (UnaPersona _ _ valorSuerte _) = valorSuerte
 
@@ -28,8 +31,10 @@ multiplicadorAmuleto = snd.head.filter esAmuleto
 
 suerteTotal :: Persona -> Int
 suerteTotal persona
-  | tieneFactor amuleto persona = (*) (multiplicadorAmuleto.factores $ persona).suerte $ persona
+  | tieneFactor amuleto persona && valorAmuleto > 0 = (*) valorAmuleto.suerte $ persona
   | otherwise = suerte persona
+    where
+        valorAmuleto = multiplicadorAmuleto.factores $ persona
 
 -- 2.
 data Juego = UnJuego {
@@ -53,7 +58,40 @@ maquinita jackpot = UnJuego {
 }
 
 -- 3.
-puedeGanar :: Juego -> Persona -> Bool
-puedeGanar juego persona = all (==True).map ($ persona).criterios $ juego
+puedeGanar :: Persona -> Juego -> Bool
+puedeGanar persona = all (==True).map ($ persona).criterios
 
--- 4.
+-- 4.a
+casino777 :: [Juego]
+casino777 = [ruleta, maquinita 20000]
+
+calcularTotalGanancias :: Persona  -> [Juego] -> (Float -> Float)
+calcularTotalGanancias persona juegos
+  | (>0).length.funcionesGanancia $ juegos = foldl1 (flip (.)).funcionesGanancia $ juegos
+  | otherwise = (*0)
+    where
+        funcionesGanancia = map funcionDinero.filter (puedeGanar persona)
+
+totalGanancias :: Persona -> Float -> [Juego] -> Float
+totalGanancias persona apuestaInicial juegos = calcularTotalGanancias persona juegos apuestaInicial
+
+--4.b
+totalGananciasRecursividad :: Persona -> Float -> [Juego] -> Float
+totalGananciasRecursividad _ _ [] = 0
+totalGananciasRecursividad persona apuestaInicial (x:xs)
+  | puedeGanar persona x = (+) (totalGananciasRecursividad persona apuestaInicial xs).funcionDinero x $ apuestaInicial
+  | otherwise = totalGananciasRecursividad persona apuestaInicial xs
+
+  {-
+    *Main> totalGanancias nico (dinero nico) casino777
+    3700.0
+
+    *Main> totalGananciasRecursividad nico (dinero nico) casino777
+    3700.0
+    
+    *Main> totalGananciasRecursividad maiu (dinero maiu) casino777
+    0.0
+
+    *Main> totalGanancias maiu (dinero maiu) casino777
+    0.0
+  -}
