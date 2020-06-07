@@ -45,11 +45,15 @@ ruleta = UnJuego {
     criterios = [(>80).suerteTotal]
 }
 
- maquinita :: Int -> Juego
- maquinita jackpot = UnJuego {
+maquinita :: Float -> Juego
+maquinita jackpot = UnJuego {
     nombre = "Maquinita",
-    funcionDinero = (+jackpot),
+    funcionDinero = (+) jackpot,
     criterios = [(>95).suerteTotal, tieneFactor "paciencia"]
 }
 
 -- 3.
+puedeGanar :: Juego -> Persona -> Bool
+puedeGanar juego persona = all (==True).map ($ persona).criterios $ juego
+
+-- 4.
