@@ -14,6 +14,9 @@ amuleto = "amuleto"
 factores :: Persona -> [(String,Int)]
 factores (UnaPersona _ _ _ listaFactores) = listaFactores
 
+nombrePersona :: Persona -> String
+nombrePersona (UnaPersona n _ _ _) = n
+
 dinero :: Persona -> Float
 dinero (UnaPersona _ d _ _) = d
 
@@ -95,3 +98,12 @@ totalGananciasRecursividad persona apuestaInicial (x:xs)
     *Main> totalGanancias maiu (dinero maiu) casino777
     0.0
   -}
+
+-- 5.
+pierdeTodo :: Persona -> [Juego] -> Bool
+pierdeTodo persona = all (==False).map (puedeGanar persona)
+
+perdedores :: [Persona] -> [Juego] -> [String]
+perdedores personas juegos = map nombrePersona.filter (`pierdeTodo` juegos) $ personas
+
+-- 6.
