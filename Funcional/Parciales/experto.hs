@@ -31,4 +31,25 @@ suerteTotal persona
   | tieneFactor amuleto persona = (*) (multiplicadorAmuleto.factores $ persona).suerte $ persona
   | otherwise = suerte persona
 
---2.
+-- 2.
+data Juego = UnJuego {
+    nombre :: String,
+    funcionDinero :: (Float -> Float),
+    criterios :: [(Persona -> Bool)]
+}
+
+ruleta :: Juego
+ruleta = UnJuego {
+    nombre = "Ruleta",
+    funcionDinero = (*37),
+    criterios = [(>80).suerteTotal]
+}
+
+ maquinita :: Int -> Juego
+ maquinita jackpot = UnJuego {
+    nombre = "Maquinita",
+    funcionDinero = (+jackpot),
+    criterios = [(>95).suerteTotal, tieneFactor "paciencia"]
+}
+
+-- 3.
