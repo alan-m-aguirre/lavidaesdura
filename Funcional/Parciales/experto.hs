@@ -117,3 +117,21 @@ apostar persona apuesta juego
   | otherwise = cambiarDinero persona (-apuesta)
       where
         ganancia = (funcionDinero juego) $ apuesta
+
+-- 7.
+{- 
+
+elCocoEstaEnLaCasa :: (Num a, Ord a, Foldable t) => (_, a) -> (c -> [a]) -> a -> t [(a -> a,c)] -> Bool
+elCocoEstaEnLaCasa x y z = all ((>z).(+42)).foldl (\a (b,c) -> y c ++ b a) (snd x)
+
+-- foldl funcion semilla lista => el último parametro es una lista. A este parametro point-free lo denominaremos _j_.
+-- (\a (b,c) -> y c ++ b a) => funcion lambda que recibe a y una tupla. _b_ e _y_ son funciones que devuelven una lista.
+-- (snd x) => _x_ es una tupla. Su segundo parametro es _a_.
+-- de la funcion lambda, a es una lista.
+-- _j_ es una lista de tuplas cuyos primeros componentes son _b_ y sus segundos componentes son _c_.
+-- _z_ es un valor numerico ya que (>z).(+42) recibe un valor numérico al que se le suma 42 y posteriormente debe poder compararse con _z_. _z_ es _a_.
+-- _b_ recibe _a_ y devuelve _a_.
+-- _j_ tiene que ser foldeable.
+-- elCocoEstaEnLaCasa devuelve un Bool (la última función es all)
+
+-}
