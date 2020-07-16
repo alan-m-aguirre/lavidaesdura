@@ -6,7 +6,7 @@ data Elemento = UnElemento {
 
 data Personaje = UnPersonaje { 
     nombre :: String,
-    salud :: Float,
+    salud :: Int,
     elementos :: [Elemento],
     anioPresente :: Int
 }
@@ -16,16 +16,16 @@ mandarAlAnio :: Int -> Personaje -> Personaje
 mandarAlAnio anio personaje = personaje { anioPresente = anio }
 
 -- 1.b
-cambiarSalud :: (Float -> Float) -> Personaje -> Personaje
+cambiarSalud :: (Int -> Int) -> Personaje -> Personaje
 cambiarSalud f personaje = personaje { salud = f.salud $ personaje }
 
 meditar :: Personaje -> Personaje
 meditar personaje = cambiarSalud (+ recupera) personaje
     where
-        recupera = (/2).salud $ personaje
+        recupera = (`div` 2).salud $ personaje
 
 -- 1.c
-causarDanio :: Float -> Personaje -> Personaje
+causarDanio :: Int -> Personaje -> Personaje
 causarDanio danio personaje
   | danio > salud personaje = cambiarSalud (*0) personaje
   | otherwise = cambiarSalud (+ (negate danio)) personaje
@@ -41,7 +41,7 @@ esMalvado :: Personaje -> Bool
 esMalvado = any (==True).map esElementoMalvado.elementos
 
 -- 2.b
-danioQueProduce :: Personaje -> Elemento -> Float
+danioQueProduce :: Personaje -> Elemento -> Int
 danioQueProduce personaje elemento = (-) saludIncial saludFinal
     where
         saludIncial = salud personaje
@@ -100,7 +100,7 @@ portal anio = UnElemento {
     defensa = id
 }
 
-aku :: Int -> Float -> Personaje
+aku :: Int -> Int -> Personaje
 aku anio cantSalud = UnPersonaje {
     nombre = "Aku",
     salud = cantSalud,
