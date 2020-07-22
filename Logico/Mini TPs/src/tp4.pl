@@ -21,31 +21,22 @@ votosTotales(Partido, VotosTotales):-
 /* Definir un predicado decidida/1 que se cumpla para una provincia si un único partido
 sacó muchos votos (porque más del 30% de los empadronados de esa provincia lo votaron). */
 
-esProvincia(Provincia):-
-	votos(_,Provincia,_).
-
-porcentajePadron(Votos,Padron,Porcentaje):-
-	Porcentaje is Votos * 100 / Padron.
+porcentaje(Cantidad,Total,Porcentaje):-
+	Porcentaje is Cantidad * 100 / Total.
 
 partidoMuyVotado(Partido,Provincia):-
 	votos(Partido,Provincia,Votos),
 	padron(Provincia,Padron),
-	porcentajePadron(Votos,Padron,Porcentaje),
+	porcentaje(Votos,Padron,Porcentaje),
 	Porcentaje > 30.
 
-complicada(Provincia):-
-	partidoMuyVotado(Partido1,Provincia),
-	partidoMuyVotado(Partido2,Provincia),
-	Partido1 \= Partido2.
-complicada(Provincia):-
-	not(partidoMuyVotado(Partido,Provincia)).
-
 decidida(Provincia):-
-	distinct(Provincia,
-		(esProvincia(Provincia),
-		not(complicada(Provincia)))
-	).
-	
+	partidoMuyVotado(Partido,Provincia),
+	forall(partidoMuyVotado(OtroPartido,Provincia), Partido == OtroPartido).
+
+decidida2(Provincia):-
+	partidoMuyVotado(UnPartido,Provincia),
+	not((partidoMuyVotado(OtroPartido,Provincia), UnPartido \= OtroPartido)).
 
 % --------------------------------
 % Código inicial - NO TOCAR
