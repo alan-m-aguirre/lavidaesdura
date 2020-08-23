@@ -140,6 +140,9 @@ masAtareado(Personaje):-
 seRigePorOtrasReglas(mafioso(_)).
 seRigePorOtrasReglas(actriz(_)).
 
+respetoPorTrabajo(actriz(Lista),Respeto):-
+    length(Lista,Cantidad),
+    Respeto is Cantidad / 10.
 respetoPorTrabajo(mafioso(capo),20).
 respetoPorTrabajo(mafioso(resuelveProblemas),10).
 respetoPorTrabajo(mafioso(maton),1).
@@ -149,10 +152,6 @@ respetoPorTrabajo(Trabajo,0):-
     not(seRigePorOtrasReglas(Trabajo))
     )).
 
-respeto(Personaje,Respeto):-
-    personaje(Personaje,actriz(Peliculas)),
-    length(Peliculas, Cantidad),
-    Respeto is Cantidad / 10.
 respeto(Personaje,Respeto):-
     personaje(Personaje,Trabajo),
     respetoPorTrabajo(Trabajo,Respeto).
@@ -167,28 +166,21 @@ personajesRespetables(Lista):-
 /*
 7. hartoDe/2: un personaje está harto de otro, cuando todas las tareas asignadas al primero requieren interactuar con el segundo (cuidar, buscar o ayudar) o un amigo del segundo.
 */
-interactua(UnPersonaje,OtroPersonaje):-
-    encargo(_,UnPersonaje,cuidar(OtroPersonaje)).
-interactua(UnPersonaje,OtroPersonaje):-
-    encargo(_,UnPersonaje,buscar(OtroPersonaje,_)).
-interactua(UnPersonaje,OtroPersonaje):-
-    encargo(_,UnPersonaje,ayudar(OtroPersonaje)).
-
-personajeEsObjetivoTarea(cuidar(Personaje),Personaje).
-personajeEsObjetivoTarea(buscar(Personaje,_),Personaje).
-personajeEsObjetivoTarea(ayudar(Personaje),Personaje).
-
-amigoOMismaPersona(UnPersonaje,OtroPersonaje):-
-    amigoReflexivo(UnPersonaje,OtroPersonaje).
-amigoOMismaPersona(UnPersonaje,OtroPersonaje):-
-    esPersonaje(UnPersonaje),
-    UnPersonaje == OtroPersonaje.
+interactuaCon(cuidar(Personaje),Personaje).
+interactuaCon(buscar(Personaje,_),Personaje).
+interactuaCon(ayudar(Personaje),Personaje).
+interactuaCon(ayudar(Amigo),Personaje):-
+    amigoReflexivo(Amigo,Personaje).
+interactuaCon(buscar(Amigo,_),Personaje):-
+    amigoReflexivo(Amigo,Personaje).
+interactuaCon(cuidar(Amigo),Personaje):-
+    amigoReflexivo(Amigo,Personaje).
 
 hartoDe(UnPersonaje,OtroPersonaje):-
     distinct(OtroPersonaje,
         (encargo(_,UnPersonaje,_),
         esPersonaje(OtroPersonaje),
-        forall(encargo(_,UnPersonaje,Tarea), (personajeEsObjetivoTarea(Tarea,Personaje), amigoOMismaPersona(Personaje,OtroPersonaje))))
+        forall(encargo(_,UnPersonaje,Tarea), (interactuaCon(Tarea,OtroPersonaje))))
     ).
 
 /*
