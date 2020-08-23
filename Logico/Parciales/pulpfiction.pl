@@ -198,9 +198,15 @@ caracteristicas(vincent,  [negro, muchoPelo, tieneCabeza]).
 caracteristicas(jules,    [tieneCabeza, muchoPelo]).
 caracteristicas(marvin,   [negro]).
 
+noComparteCaracteristica(Caracteristica,Lista1,Lista2):-
+    member(Caracteristica,Lista1),
+    not(member(Caracteristica,Lista2)).
+noComparteCaracteristica(Caracteristica,Lista1,Lista2):-
+    member(Caracteristica,Lista2),
+    not(member(Caracteristica,Lista1)).
+
 duoDiferenciable(UnPersonaje,OtroPersonaje):-
     relacionados(UnPersonaje,OtroPersonaje),
     caracteristicas(UnPersonaje,Lista1),
     caracteristicas(OtroPersonaje,Lista2),
-    member(Caracteristica,Lista1),
-    not(member(Caracteristica,Lista2)).
+    noComparteCaracteristica(_,Lista1,Lista2).
