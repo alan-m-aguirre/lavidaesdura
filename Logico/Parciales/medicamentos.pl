@@ -97,6 +97,7 @@ tipoSuicida(Persona):-
 % 5.
 esComprador(Persona):-
     distinct(Persona, actividad(Persona,_,compro(_,_))).
+
 preguntoPorPrecio(Persona,Medicamento):-
     actividad(Persona,FechaCompra,compro(Medicamento,FarmaciaCompra)),
     vende(FarmaciaCompra,Medicamento,PrecioCompra),
